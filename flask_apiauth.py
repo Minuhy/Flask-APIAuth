@@ -30,7 +30,6 @@ class ApiAuth(object):
         """ 验证密码回调，此回调返回的非空数据将放在current_user中
         Verify the password callback, and the non empty data returned
         by this callback will be placed in current_ In user """
-
         # print('设置密码验证函数')
         self.verify_password_callback = f
         return f
@@ -47,7 +46,7 @@ class ApiAuth(object):
         login and authentication failure reply to the client"""
         # print('生成token')
         token = username + self.split_character + password
-        return base64.urlsafe_b64encode(token.encode("utf-8"))
+        return base64.urlsafe_b64encode(token.encode("utf-8")).decode()
 
     def authentication_failed(self):
         """ 认证失败调用
@@ -59,7 +58,7 @@ class ApiAuth(object):
             return self.error_content_callback()
         else:
             # 否则返回文字，登录失败
-            return 'Login failed'
+            return 'login failed'
 
     @property
     def current_user(self):
@@ -90,7 +89,7 @@ class ApiAuth(object):
                         # print('user：', user, 'hash_password', hash_password)
                         # 如果账号和密码都存在
                         if user and hash_password:
-                            auth_user = {'user': user, 'hash_password': hash_password}
+                            auth_user = {'user': user, 'pwd': hash_password}
                     except (ValueError, KeyError):
                         # 如果解析失败或者没有token
                         # print('token解析失败')
@@ -107,7 +106,7 @@ class ApiAuth(object):
                     # 如果有密码验证函数
                     if self.verify_password_callback:
                         # print('开始验证密码')
-                        user = self.verify_password_callback(auth_user.get('user'), auth_user.get('hash_password'))
+                        user = self.verify_password_callback(auth_user.get('user'), auth_user.get('pwd'))
                         if user:
                             # print('密码验证成功')
                             # 如果user不为空，加载
